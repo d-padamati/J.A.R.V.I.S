@@ -1,0 +1,65 @@
+import face_recognition
+import cv2
+import pyttsx3
+from jarvis import Mainexecution
+import numpy as np
+
+
+def speak(text):  
+    engine =pyttsx3.init()
+    Id=r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_DAVID_11.0'
+    engine.setProperty('voice' , Id)
+    print(f"J.A.R.V.I.S :{text}")
+    engine.say(text=text)
+    engine.runAndWait()
+
+
+video = cv2.VideoCapture(1)
+
+
+face = face_recognition.load_image_file("D:\Programs\python\jarvis\mypic.jpg")
+faceencoding = face_recognition.face_encodings(face)[0]
+
+face_encodings_list = [
+    faceencoding]
+
+face_encodings = []
+s =True
+
+face_coordinates=[]
+
+
+while True:
+    speak('detecting face')
+    _,frame = video.read()
+
+    resized_frame = cv2.resize(frame , (660,440) , fx=0.25,fy=0.25)
+    resized_frame_rgb = resized_frame[: ,: ,::-1]
+
+
+    if s:
+        face_coordinates =face_recognition.face_locations(resized_frame_rgb)
+        face_encodings =face_recognition.face_encodings(resized_frame_rgb ,face_coordinates)
+
+        for faces in face_encodings:
+            matches =face_recognition.compare_faces(face_encodings_list, face)
+            if matches[0] == True:
+                video.release()
+                speak('face matched')
+                cv2.destroyAllWindows()
+                Mainexecution()
+            else:
+                speak('face not matched')
+                speak("try again")
+
+    cv2.imshow('face scan' , frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+video.release()
+cv2.destroyAllWindows()    
+
+
+
+
